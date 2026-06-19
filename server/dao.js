@@ -18,3 +18,22 @@ export function initDb() {
   });
 }
 
+export function getUser(username, password) {
+  return new Promise((resolve, reject) => {
+    const sql = "SELECT * FROM users WHERE username = ?";
+    db.get(sql, [username], (err, row) => {
+      if (err) { reject(err); }
+      else if (row === undefined) { resolve(false); }
+      else {
+        crypto.scrypt(password, row.salt, 32, (err, hashed) => {
+          if (err) reject(err);
+          if (!crypto.timingSafeEqual(Buffer.from(row.password_hash, "hex"), hashed))
+            resolve(false);
+          else
+            resolve({ id: row.id, username: row.username });
+        });
+      }
+    });
+  });
+}
+
