@@ -2,6 +2,8 @@ import express from "express";
 import morgan from "morgan";
 import cors from "cors";
 
+import { initDb } from "./dao.js";
+
 const app = express();
 const port = 3001;
 
@@ -14,6 +16,8 @@ const corsOptions = {
   credentials: true
 };
 app.use(cors(corsOptions));
+
+initDb();
 
 app.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);

@@ -2,3 +2,6 @@ node_modules/
 .DS_Store
 Desktop.ini
 Thumbs.db
+
+# Database file
+server/database.sqlite
