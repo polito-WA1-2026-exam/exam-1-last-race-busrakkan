@@ -1,4 +1,5 @@
 import sqlite from "sqlite3";
+import crypto from "crypto";
 
 const db = new sqlite.Database("database.sqlite");
 
@@ -37,3 +38,68 @@ export function getUser(username, password) {
   });
 }
 
+export function getNetwork() {
+  return new Promise((resolve, reject) => {
+    const network = { lines: [], stations: [], segments: [] };
+
+    db.all("SELECT * FROM lines", [], (err, lines) => {
+      if (err) { reject(err); return; }
+
+      db.all("SELECT * FROM stations", [], (err, stations) => {
+        if (err) { reject(err); return; }
+
+        let doneCount = 0;
+        for (let i = 0; i < stations.length; i++) {
+          db.all("SELECT line_id FROM line_stations WHERE station_id = ?", [stations[i].id], (err, ls) => {
+            if (err) reject(err);
+            const isInterchange = ls.length >= 2;
+            network.stations.push({ id: stations[i].id, name: stations[i].name, isInterchange });
+            doneCount++;
+            if (doneCount === stations.length + lines.length) resolve(network);
+          });
+        }
+
+        for (const line of lines) {
+          db.all(
+            "SELECT s.id, s.name FROM line_stations ls JOIN stations s ON ls.station_id = s.id WHERE ls.line_id = ? ORDER BY ls.position",
+            [line.id],
+            (err, sts) => {
+              if (err) reject(err);
+              network.lines.push({ id: line.id, name: line.name, color: line.color, stations: sts });
+              doneCount++;
+              if (doneCount === stations.length + lines.length) resolve(network);
+            }
+          );
+        }
+
+        db.all(
+          "SELECT seg.id, s1.name AS station1, s2.name AS station2, l.name AS line FROM segments seg JOIN stations s1 ON seg.station1_id = s1.id JOIN stations s2 ON seg.station2_id = s2.id JOIN lines l ON seg.line_id = l.id",
+          [],
+          (err, segs) => {
+            if (err) reject(err);
+            network.segments = segs.map(s => ({ id: s.id, station1: s.station1, station2: s.station2, line: s.line }));
+          }
+        );
+      });
+    });
+  });
+}
+
+export function getAllStations() {
+  return new Promise((resolve, reject) => {
+    db.all("SELECT * FROM stations", [], (err, rows) => {
+      if (err) reject(err);
+      resolve(rows);
+    });
+  });
+}
+
+export function getSegmentsOnly() {
+  return new Promise((resolve, reject) => {
+    const sql = "SELECT seg.id, s1.name AS station1, s2.name AS station2 FROM segments seg JOIN stations s1 ON seg.station1_id = s1.id JOIN stations s2 ON seg.station2_id = s2.id";
+    db.all(sql, [], (err, rows) => {
+      if (err) reject(err);
+      resolve({ segments: rows.map(r => ({ id: r.id, station1: r.station1, station2: r.station2 })) });
+    });
+  });
+}

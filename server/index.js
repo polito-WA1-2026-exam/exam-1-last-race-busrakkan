@@ -5,7 +5,7 @@ import cors from "cors";
 import passport from 'passport';
 import LocalStrategy from 'passport-local';
 import session from 'express-session';
-import { initDb, getUser } from "./dao.js";
+import { initDb, getUser, getNetwork, getSegmentsOnly } from "./dao.js";
 
 const app = express();
 const port = 3001;
@@ -76,12 +76,31 @@ app.delete("/api/sessions/current", (req, res) => {
 // GET /api/instructions (public, no auth)
 app.get("/api/instructions", (req, res) => {
   res.json({
-    title: "Last Race - Game Instructions",
+    title: "Game Instructions",
     content: "Last Race begins.. You get to plan your route based on the metro network map, the goal is to reach your destination before time runs out. Some events happen randomly, you lose or win points based on your luck!"
   });
 });
 
 
+// GET /api/network (auth required)
+app.get("/api/network", isLoggedIn, async (req, res) => {
+  try {
+    const network = await getNetwork();
+    res.json(network);
+  } catch {
+    res.status(500).end();
+  }
+});
+
+// GET /api/network/segments (auth required, no line info)
+app.get("/api/network/segments", isLoggedIn, async (req, res) => {
+  try {
+    const segments = await getSegmentsOnly();
+    res.json(segments);
+  } catch {
+    res.status(500).end();
+  }
+});
 
 initDb().then(() => {
   app.listen(port, () => { console.log(`API server started at http://localhost:${port}`) });
