@@ -5,7 +5,7 @@ import cors from "cors";
 import passport from 'passport';
 import LocalStrategy from 'passport-local';
 import session from 'express-session';
-import { initDb, getUser, getNetwork, getSegmentsOnly } from "./dao.js";
+import { initDb, getUser, getNetwork, getSegmentsOnly, getAllStations, getAllSegments } from "./dao.js";
 
 const app = express();
 const port = 3001;
@@ -99,6 +99,17 @@ app.get("/api/network/segments", isLoggedIn, async (req, res) => {
     res.json(segments);
   } catch {
     res.status(500).end();
+  }
+});
+
+// temporary test route
+app.get("/api/test-db", async (req, res) => {
+  try {
+    const stations = await getAllStations();
+    const segments = await getAllSegments();
+    res.json({ stationCount: stations.length, segmentCount: segments.length });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 

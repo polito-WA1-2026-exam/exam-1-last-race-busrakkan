@@ -85,6 +85,17 @@ export function getNetwork() {
   });
 }
 
+export function getSegmentsOnly() {
+  return new Promise((resolve, reject) => {
+    const sql = "SELECT seg.id, s1.name AS station1, s2.name AS station2 FROM segments seg JOIN stations s1 ON seg.station1_id = s1.id JOIN stations s2 ON seg.station2_id = s2.id";
+    db.all(sql, [], (err, rows) => {
+      if (err) reject(err);
+      resolve({ segments: rows.map(r => ({ id: r.id, station1: r.station1, station2: r.station2 })) });
+    });
+  });
+}
+
+
 export function getAllStations() {
   return new Promise((resolve, reject) => {
     db.all("SELECT * FROM stations", [], (err, rows) => {
@@ -94,12 +105,22 @@ export function getAllStations() {
   });
 }
 
-export function getSegmentsOnly() {
+
+export function getAllSegments() {
   return new Promise((resolve, reject) => {
-    const sql = "SELECT seg.id, s1.name AS station1, s2.name AS station2 FROM segments seg JOIN stations s1 ON seg.station1_id = s1.id JOIN stations s2 ON seg.station2_id = s2.id";
-    db.all(sql, [], (err, rows) => {
+    db.all("SELECT * FROM segments", [], (err, rows) => {
       if (err) reject(err);
-      resolve({ segments: rows.map(r => ({ id: r.id, station1: r.station1, station2: r.station2 })) });
+      resolve(rows);
+    });
+  });
+}
+
+export function addGame(userId, startId, destId) {
+  return new Promise((resolve, reject) => {
+    const sql = "INSERT INTO games (user_id, status, starting_station_id, destination_station_id) VALUES (?, 'planning', ?, ?)";
+    db.run(sql, [userId, startId, destId], function (err) {
+      if (err) reject(err);
+      resolve(this.lastID);
     });
   });
 }
