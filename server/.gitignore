@@ -4,4 +4,4 @@ Desktop.ini
 Thumbs.db
 
 # Database file
-server/database.sqlite
+database.sqlite
