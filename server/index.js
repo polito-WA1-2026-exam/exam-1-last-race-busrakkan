@@ -102,17 +102,6 @@ app.get("/api/network/segments", isLoggedIn, async (req, res) => {
   }
 });
 
-// temporary test route
-app.get("/api/test-db", async (req, res) => {
-  try {
-    const stations = await getAllStations();
-    const segments = await getAllSegments();
-    res.json({ stationCount: stations.length, segmentCount: segments.length });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
 initDb().then(() => {
   app.listen(port, () => { console.log(`API server started at http://localhost:${port}`) });
 });
