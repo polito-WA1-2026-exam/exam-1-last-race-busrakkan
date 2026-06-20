@@ -41,10 +41,10 @@ export function getNetwork() {
     db.all("SELECT * FROM stations", [], (err, stations) => {
       if (err) return reject(err);
 
-      const perStation = stations.map(st => new Promise((res, rej) => {
-        db.all("SELECT line_id FROM line_stations WHERE station_id = ?", [st.id], (err, ls) => {
+      const perStation = stations.map(station => new Promise((res, rej) => {
+        db.all("SELECT line_id FROM line_stations WHERE station_id = ?", [station.id], (err, lineIdRows) => {
           if (err) return rej(err);
-          res({ id: st.id, name: st.name, isInterchange: ls.length >= 2 });
+          res({ id: station.id, name: station.name, isInterchange: lineIdRows.length >= 2 });
         });
       }));
 
@@ -60,9 +60,9 @@ export function getNetwork() {
         db.all(
           "SELECT s.id, s.name FROM line_stations ls JOIN stations s ON ls.station_id = s.id WHERE ls.line_id = ? ORDER BY ls.position",
           [line.id],
-          (err, sts) => {
+          (err, lineStations) => {
             if (err) return rej(err);
-            res({ id: line.id, name: line.name, color: line.color, stations: sts });
+            res({ id: line.id, name: line.name, color: line.color, stations: lineStations });
           }
         );
       }));
@@ -75,9 +75,9 @@ export function getNetwork() {
     db.all(
       "SELECT seg.id, s1.name AS station1, s2.name AS station2, l.name AS line FROM segments seg JOIN stations s1 ON seg.station1_id = s1.id JOIN stations s2 ON seg.station2_id = s2.id JOIN lines l ON seg.line_id = l.id",
       [],
-      (err, segs) => {
+      (err, segments) => {
         if (err) return reject(err);
-        resolve(segs.map(s => ({ id: s.id, station1: s.station1, station2: s.station2, line: s.line })));
+        resolve(segments.map(segment => ({ id: segment.id, station1: segment.station1, station2: segment.station2, line: segment.line })));
       }
     );
   });
@@ -91,7 +91,7 @@ export function getSegmentsOnly() {
     const sql = "SELECT seg.id, s1.name AS station1, s2.name AS station2 FROM segments seg JOIN stations s1 ON seg.station1_id = s1.id JOIN stations s2 ON seg.station2_id = s2.id";
     db.all(sql, [], (err, rows) => {
       if (err) return reject(err);
-      resolve({ segments: rows.map(r => ({ id: r.id, station1: r.station1, station2: r.station2 })) });
+      resolve({ segments: rows.map(row => ({ id: row.id, station1: row.station1, station2: row.station2 })) });
     });
   });
 }
@@ -142,6 +142,21 @@ export function getLineStationsForStation(stationId) {
   });
 }
 
+// it's a DB access function so it belongs here not in gameHelpers.js
+export async function getInterchangeStationIds() {
+  const stations = await getAllStations();
+
+  const interchangeIds = [];
+  for (const station of stations) {
+    const lineStations = await getLineStationsForStation(station.id);
+    if (lineStations.length >= 2) {
+      interchangeIds.push(station.id);
+    }
+  }
+
+  return interchangeIds;
+}
+
 export function submitRoute(gameId, segmentIds, lineIds) {
   return new Promise((resolve, reject) => {
     const gameSql = "UPDATE games SET submitted_at = datetime('now') WHERE id = ?";
@@ -163,11 +178,11 @@ export function submitRoute(gameId, segmentIds, lineIds) {
           const stepStmt = db.prepare("INSERT INTO game_step_events (game_id, segment_position, event_id, coins_before, coins_after) VALUES (?, ?, ?, ?, ?)");
 
           for (let i = 0; i < segmentIds.length; i++) {
-            const ev = events[Math.floor(Math.random() * events.length)];
+            const event = events[Math.floor(Math.random() * events.length)];
             const before = coins;
-            coins = coins + ev.effect;   // no flooring here. intermediate values can be negative
-            steps.push({ coinsBefore: before, coinsAfter: coins, event: ev });
-            stepStmt.run([gameId, i, ev.id, before, coins]);
+            coins = coins + event.effect;   // no flooring here. intermediate values can be negative
+            steps.push({ coinsBefore: before, coinsAfter: coins, event });
+            stepStmt.run([gameId, i, event.id, before, coins]);
           }
 
           stepStmt.finalize((err) => {
@@ -212,7 +227,7 @@ export function getGame(gameId) {
       db.all(
         "SELECT s1.name AS from_station, s2.name AS to_station, l.name AS line, se.station1_id, se.station2_id, grs.position FROM game_route_segments grs JOIN segments se ON grs.segment_id = se.id JOIN stations s1 ON se.station1_id = s1.id JOIN stations s2 ON se.station2_id = s2.id JOIN lines l ON grs.line_id = l.id WHERE grs.game_id = ? ORDER BY grs.position",
         [gameId],
-        (err, routeSegs) => {
+        (err, routeSegments) => {
           if (err) return reject(err);
 
           db.all(
@@ -228,11 +243,11 @@ export function getGame(gameId) {
                 destinationStation: row.destination_station_id,
                 coins: row.coins,
                 score: row.score,
-                route: routeSegs,
-                steps: steps.map(s => ({
-                  coinsBefore: s.coins_before,
-                  coinsAfter: s.coins_after,
-                  event: { description: s.description, effect: s.effect },
+                route: routeSegments,
+                steps: steps.map(step => ({
+                  coinsBefore: step.coins_before,
+                  coinsAfter: step.coins_after,
+                  event: { description: step.description, effect: step.effect },
                 })),
               });
             }

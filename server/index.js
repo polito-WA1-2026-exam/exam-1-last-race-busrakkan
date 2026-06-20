@@ -5,9 +5,19 @@ import cors from "cors";
 import passport from 'passport';
 import LocalStrategy from 'passport-local';
 import session from 'express-session';
-import { initDb, getUser, getNetwork, getSegmentsOnly, getAllStations, getAllSegments, addGame,
-  getGame, startPlanning
- } from "./dao.js";
+import { check, validationResult } from "express-validator";
+
+import {
+  initDb, getUser, getNetwork, getSegmentsOnly, getAllStations, getAllSegments, addGame,
+  getGame, startPlanning, getLineStationsForStation, submitRoute, completeGameInvalid,
+  getInterchangeStationIds
+} from "./dao.js";
+
+import {
+  buildAdjacencyList, findValidStationPairs,
+  allSegmentsExist, hasNoDuplicateSegments, startsAtStation, endsAtStation,
+  isContinuous, lineChangesAreAtInterchanges
+} from "./gameHelpers.js";
 
 const app = express();
 const port = 3001;
@@ -52,7 +62,7 @@ app.use(session({
 }));
 app.use(passport.authenticate("session"));
 
-//  routes:
+//       -routes:
 
 // POST /api/sessions
 app.post("/api/sessions", passport.authenticate("local"), function (req, res) {
@@ -110,61 +120,21 @@ app.post("/api/games", isLoggedIn, async (req, res) => {
     const stations = await getAllStations();
     const segments = await getAllSegments();
 
-    // BFS to find shortest path distances between all station pairs
-    const adj = {};
-    for (const s of stations) {
-      adj[s.id] = [];
-    }
-    for (const seg of segments) {
-      adj[seg.station1_id].push(seg.station2_id);
-      adj[seg.station2_id].push(seg.station1_id);
-    }
-
-    function bfs(start) {
-      const dist = {};
-      for (const s of stations) dist[s.id] = Infinity;
-      dist[start] = 0;
-      const q = [start];
-      while (q.length > 0) {
-        const cur = q.shift();
-        for (const nb of adj[cur]) {
-          if (dist[nb] === Infinity) {
-            dist[nb] = dist[cur] + 1;
-            q.push(nb);
-          }
-        }
-      }
-      return dist;
-    }
-
-    const allPairs = [];
-    for (let i = 0; i < stations.length; i++) {
-      allPairs.push(bfs(stations[i].id));
-    }
-
-    // find pairs with distance >= 3
-    const validPairs = [];
-    for (let i = 0; i < stations.length; i++) {
-      for (let j = i + 1; j < stations.length; j++) {
-        const d = allPairs[i][stations[j].id];
-        if (d >= 3 && d < Infinity) {
-          validPairs.push({ a: stations[i].id, b: stations[j].id, d });
-        }
-      }
-    }
+    const adjacencyList = buildAdjacencyList(stations, segments);
+    const validPairs = findValidStationPairs(stations, adjacencyList, 3);
 
     if (validPairs.length === 0) {
-      return res.status(500).json({ error: "No valid station pairs found" });
+      return res.status(500).json({ error: "no valid station pairs found" });
     }
 
     const pair = validPairs[Math.floor(Math.random() * validPairs.length)];
-    const startId = Math.random() < 0.5 ? pair.a : pair.b;
-    const destId = startId === pair.a ? pair.b : pair.a;
+    const startId = Math.random() < 0.5 ? pair.stationA : pair.stationB;
+    const destId = startId === pair.stationA ? pair.stationB : pair.stationA;
 
     const gameId = await addGame(req.user.id, startId, destId);
 
-    const startStation = stations.find(s => s.id === startId);
-    const destStation = stations.find(s => s.id === destId);
+    const startStation = stations.find(station => station.id === startId);
+    const destStation = stations.find(station => station.id === destId);
 
     res.status(201).json({
       id: gameId,
@@ -188,6 +158,81 @@ app.post("/api/games/:id/start", isLoggedIn, async (req, res) => {
     await startPlanning(req.params.id);
     res.status(200).json({ success: true });
   } catch {
+    res.status(500).end();
+  }
+});
+
+
+// shared "fail" path: mark the game as invalid (score 0) and send the standard response
+async function rejectInvalidRoute(gameId, res) {
+  await completeGameInvalid(gameId);
+  return res.json({ valid: false, score: 0, message: "Invalid route" });
+}
+
+// POST /api/games/:id/route (submit route)
+app.post("/api/games/:id/route", isLoggedIn, [
+  check("segmentIds").isArray()   // allow empty arrays, treated as invalid route
+], async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array() });
+  }
+
+  try {
+    const segmentIds = req.body.segmentIds;
+    const game = await getGame(req.params.id);
+
+    if (!game) {
+      return res.status(404).json({ error: "Game not found" });
+    }
+    if (game.user_id !== req.user.id) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+    if (game.status === 'completed') {
+      return res.status(400).json({ valid: false, score: 0, message: "Game already completed" });
+    }
+
+    const segments = await getAllSegments();
+    const segmentsById = {};
+    for (const segment of segments) {
+      segmentsById[segment.id] = segment;
+    }
+
+    if (segmentIds.length === 0) {
+      return rejectInvalidRoute(req.params.id, res);
+    }
+    if (!allSegmentsExist(segmentIds, segmentsById)) {
+      return rejectInvalidRoute(req.params.id, res);
+    }
+    if (!hasNoDuplicateSegments(segmentIds)) {
+      return rejectInvalidRoute(req.params.id, res);
+    }
+
+    const startId = game.startingStation;
+    const destId = game.destinationStation;
+    const firstSegment = segmentsById[segmentIds[0]];
+    const lastSegment = segmentsById[segmentIds[segmentIds.length - 1]];
+
+    if (!startsAtStation(firstSegment, startId)) {
+      return rejectInvalidRoute(req.params.id, res);
+    }
+    if (!endsAtStation(lastSegment, destId)) {
+      return rejectInvalidRoute(req.params.id, res);
+    }
+    if (!isContinuous(segmentIds, segmentsById)) {
+      return rejectInvalidRoute(req.params.id, res);
+    }
+
+    const interchangeStationIds = await getInterchangeStationIds();
+    if (!lineChangesAreAtInterchanges(segmentIds, segmentsById, interchangeStationIds)) {
+      return rejectInvalidRoute(req.params.id, res);
+    }
+
+    const lineIds = segmentIds.map(id => segmentsById[id].line_id);
+    const result = await submitRoute(req.params.id, segmentIds, lineIds);
+    res.json(result);
+  } catch (e) {
+    console.error(e);
     res.status(500).end();
   }
 });
