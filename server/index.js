@@ -5,7 +5,7 @@ import cors from "cors";
 import passport from 'passport';
 import LocalStrategy from 'passport-local';
 import session from 'express-session';
-import { initDb, getUser, getNetwork, getSegmentsOnly, getAllStations, getAllSegments } from "./dao.js";
+import { initDb, getUser, getNetwork, getSegmentsOnly, getAllStations, getAllSegments, addGame } from "./dao.js";
 
 const app = express();
 const port = 3001;
@@ -98,6 +98,80 @@ app.get("/api/network/segments", isLoggedIn, async (req, res) => {
     const segments = await getSegmentsOnly();
     res.json(segments);
   } catch {
+    res.status(500).end();
+  }
+});
+
+// POST /api/games (start new game)
+app.post("/api/games", isLoggedIn, async (req, res) => {
+  try {
+    const stations = await getAllStations();
+    const segments = await getAllSegments();
+
+    // BFS to find shortest path distances between all station pairs
+    const adj = {};
+    for (const s of stations) {
+      adj[s.id] = [];
+    }
+    for (const seg of segments) {
+      adj[seg.station1_id].push(seg.station2_id);
+      adj[seg.station2_id].push(seg.station1_id);
+    }
+
+    function bfs(start) {
+      const dist = {};
+      for (const s of stations) dist[s.id] = Infinity;
+      dist[start] = 0;
+      const q = [start];
+      while (q.length > 0) {
+        const cur = q.shift();
+        for (const nb of adj[cur]) {
+          if (dist[nb] === Infinity) {
+            dist[nb] = dist[cur] + 1;
+            q.push(nb);
+          }
+        }
+      }
+      return dist;
+    }
+
+    const allPairs = [];
+    for (let i = 0; i < stations.length; i++) {
+      allPairs.push(bfs(stations[i].id));
+    }
+
+    // find pairs with distance >= 3
+    const validPairs = [];
+    for (let i = 0; i < stations.length; i++) {
+      for (let j = i + 1; j < stations.length; j++) {
+        const d = allPairs[i][stations[j].id];
+        if (d >= 3 && d < Infinity) {
+          validPairs.push({ a: stations[i].id, b: stations[j].id, d });
+        }
+      }
+    }
+
+    if (validPairs.length === 0) {
+      return res.status(500).json({ error: "No valid station pairs found" });
+    }
+
+    const pair = validPairs[Math.floor(Math.random() * validPairs.length)];
+    const startId = Math.random() < 0.5 ? pair.a : pair.b;
+    const destId = startId === pair.a ? pair.b : pair.a;
+
+    const gameId = await addGame(req.user.id, startId, destId);
+
+    const startStation = stations.find(s => s.id === startId);
+    const destStation = stations.find(s => s.id === destId);
+
+    res.status(201).json({
+      id: gameId,
+      startingStation: { id: startStation.id, name: startStation.name },
+      destinationStation: { id: destStation.id, name: destStation.name },
+      minDistance: pair.d,
+    });
+  } catch (e) {
+    console.error(e);
     res.status(500).end();
   }
 });
