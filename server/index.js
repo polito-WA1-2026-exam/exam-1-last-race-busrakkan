@@ -237,6 +237,15 @@ app.post("/api/games/:id/route", isLoggedIn, [
   }
 });
 
+// GET /api/ranking (auth required)
+app.get("/api/ranking", isLoggedIn, async (req, res) => {
+  try {
+    const ranking = await getRanking();
+    res.json(ranking);
+  } catch {
+    res.status(500).end();
+  }
+});
 
 initDb().then(() => {
   app.listen(port, () => { console.log(`API server started at http://localhost:${port}`) });

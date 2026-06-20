@@ -257,3 +257,14 @@ export function getGame(gameId) {
     });
   });
 }
+
+export function getRanking() {
+  return new Promise((resolve, reject) => {
+    const sql = "SELECT u.username, MAX(g.score) AS bestScore, COUNT(g.id) AS gamesPlayed FROM users u JOIN games g ON g.user_id = u.id WHERE g.status = 'completed' GROUP BY u.id ORDER BY bestScore DESC";
+    db.all(sql, [], (err, rows) => {
+      if (err) reject(err);
+      const ranking = rows.map((r, idx) => ({ rank: idx + 1, username: r.username, bestScore: r.bestScore, gamesPlayed: r.gamesPlayed }));
+      resolve(ranking);
+    });
+  });
+}
