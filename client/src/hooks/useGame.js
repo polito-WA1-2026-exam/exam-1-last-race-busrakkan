@@ -9,6 +9,7 @@ function useGame() {
   const [selectedSegments, setSelectedSegments] = useState([]);
   const [steps, setSteps] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
+  const [score, setScore] = useState(0);
 
   const startNewGame = async () => {
     try {
@@ -19,6 +20,7 @@ function useGame() {
       setSelectedSegments([]);
       setSteps([]);
       setCurrentStep(0);
+      setScore(0);
       setPhase('setup');
     } catch (e) {
       console.error(e);
@@ -53,13 +55,16 @@ function useGame() {
       const result = await submitRoute(game.id, ids);
       if (result.valid) {
         setSteps(result.steps);
+        setScore(result.score);
         setPhase('execution');
       } else {
+        setScore(0);
         setSteps([]);
         setPhase('result');
       }
     } catch (e) {
       console.error(e);
+      setScore(0);
       setSteps([]);
       setPhase('result');
     }
@@ -83,14 +88,12 @@ function useGame() {
     setSelectedSegments([]);
     setSteps([]);
     setCurrentStep(0);
+    setScore(0);
   };
 
-  // derived values. never stored, always computed from steps[]
   const displayedCoins = steps.length > 0 && currentStep < steps.length
     ? steps[currentStep].coinsAfter
-    : (steps.length > 0 ? steps[steps.length - 1].coinsAfter : 20);
-
-  const score = steps.length > 0 ? steps[steps.length - 1].coinsAfter : 0;
+    : (steps.length > 0 ? steps[steps.length - 1].coinsAfter : 0);
 
   return {
     phase, game, network, segments,

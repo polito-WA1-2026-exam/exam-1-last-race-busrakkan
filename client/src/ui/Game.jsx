@@ -1,5 +1,6 @@
 import { Container, Button } from "react-bootstrap";
 import useGame from "../hooks/useGame";
+import NetworkMap from "./Map.jsx";
 
 function Game() {
   const {
@@ -22,11 +23,16 @@ function Game() {
 
   if (phase === 'setup' && network) {
     return (
-      <Container className="mt-3 text-center">
+      <Container className="mt-3 d-flex flex-column" style={{ flex: 1, minHeight: 0 }}>
         <h3>Setup</h3>
         <p><strong>From:</strong> {game.startingStation.name} &rarr; <strong>To:</strong> {game.destinationStation.name}</p>
-        <p className="text-muted">Network map coming soon.</p>
-        <Button variant="success" size="lg" onClick={() => beginPlanningPhase()}>Ready</Button>
+        <p className="text-muted">Study the map. Click Ready when you are prepared.</p>
+        <div style={{ flexGrow: 1, minHeight: 0 }}>
+          <NetworkMap lines={network.lines} stations={network.stations} segments={network.segments} />
+        </div>
+        <div className="text-center mt-3">
+          <Button variant="success" size="lg" onClick={() => beginPlanningPhase()}>Ready</Button>
+        </div>
       </Container>
     );
   }
