@@ -1,4 +1,4 @@
-/* banner header */
+/*BANNER HEADER — Flat lime green banner, no shadows */
 .banner-wrapper {
   width: 100%;
   background: var(--bg-pink);
@@ -66,8 +66,8 @@
   letter-spacing: 0.03em;
   color: var(--text-primary);
 }
-/* buttons */
 
+/* BUTTONS — Pill-Shaped Sticker Style */
 .btn {
   font-family: var(--font-body);
   font-weight: 700;
@@ -84,4 +84,328 @@
 .btn-lg {
   font-size: 1.3rem;
   padding: 14px 36px;
+}
+
+.btn-sm {
+  font-size: 0.75rem;
+  padding: 5px 12px;
+  border-radius: 50px !important;
+}
+
+/* Primary — Lime */
+.btn-primary {
+  background: var(--banner-lime);
+  border-color: var(--banner-lime-d);
+  color: var(--text-primary);
+}
+.btn-primary:hover,
+.btn-primary:focus-visible {
+  background: #8fffd6;
+  border-color: var(--banner-lime);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sticker-lg);
+  transform: translate(-2px, -2px);
+}
+.btn-primary:active {
+  background: var(--banner-lime-d) !important;
+  border-color: var(--banner-lime-d) !important;
+  box-shadow: var(--shadow-sticker-sm);
+  transform: translate(0, 0);
+}
+
+/* Success — Neon Green */
+.btn-success {
+  background: var(--neon-green);
+  border-color: var(--neon-green-d);
+  color: var(--white);
+}
+.btn-success:hover,
+.btn-success:focus-visible {
+  background: #22ff1a;
+  border-color: var(--neon-green);
+  color: var(--white);
+  box-shadow: var(--shadow-sticker-lg);
+  transform: translate(-2px, -2px);
+}
+
+/* Warning — Lime */
+.btn-warning {
+  background: var(--lime-accent);
+  border-color: #90e87a;
+  color: var(--text-primary);
+}
+.btn-warning:hover,
+.btn-warning:focus-visible {
+  background: #c5ffaa;
+  border-color: var(--lime-accent);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sticker-lg);
+  transform: translate(-2px, -2px);
+}
+
+/* Danger — Magenta */
+.btn-danger {
+  background: var(--magenta);
+  border-color: var(--magenta-d);
+  color: var(--white);
+}
+.btn-danger:hover,
+.btn-danger:focus-visible {
+  background: #f040ff;
+  border-color: var(--magenta);
+  color: var(--white);
+  box-shadow: var(--shadow-sticker-lg);
+  transform: translate(-2px, -2px);
+}
+
+/* Outline variants */
+.btn-outline-primary {
+  color: var(--banner-lime-d);
+  border: 2px solid var(--banner-lime-d);
+  background: transparent;
+}
+.btn-outline-primary:hover {
+  background: var(--banner-lime);
+  color: var(--text-primary);
+  border-color: var(--banner-lime);
+  box-shadow: var(--shadow-sticker-lg);
+  transform: translate(-2px, -2px);
+}
+
+.btn-outline-secondary {
+  color: var(--text-muted);
+  border: 2px solid var(--text-muted);
+}
+.btn-outline-secondary:hover {
+  background: var(--text-muted);
+  color: var(--white);
+  border-color: var(--text-muted);
+}
+
+.btn-outline-danger {
+  color: var(--magenta);
+  border: 2px solid var(--magenta);
+}
+.btn-outline-danger:hover {
+  background: var(--magenta);
+  color: var(--white);
+  border-color: var(--magenta);
+  box-shadow: var(--shadow-sticker-lg);
+  transform: translate(-2px, -2px);
+}
+
+.btn-outline-light {
+  border: 2px solid var(--bubble-pink-d);
+  border-radius: 50px !important;
+  color: var(--text-primary);
+}
+.btn-outline-light:hover {
+  background: var(--bubble-pink);
+  color: var(--text-primary);
+  border-color: var(--bubble-pink-d);
+}
+
+/* Disabled */
+.btn:disabled,
+.btn.disabled {
+  opacity: 0.4;
+  box-shadow: none;
+  transform: none;
+  cursor: not-allowed;
+}
+
+/* FORMS — Pill-Shaped Inputs */
+.form-control {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 1rem;
+  border: 2px solid var(--bubble-pink-d);
+  border-radius: 50px !important;
+  padding: 10px 18px;
+  background: var(--surface-white);
+  color: var(--text-primary);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-control:focus {
+  border-color: var(--magenta);
+  box-shadow: 0 0 0 4px rgba(231, 14, 249, 0.12);
+  outline: none;
+  background: var(--surface-white);
+  color: var(--text-primary);
+}
+.form-control::placeholder {
+  color: var(--text-muted);
+}
+
+.form-label {
+  font-family: var(--font-body);
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  color: var(--lime);
+  margin-bottom: 6px;
+}
+
+/* PROGRESS BARS — Neon Pill */
+.progress {
+  background: var(--bg-pink-light);
+  border-radius: 50px;
+  border: 2px solid var(--bubble-pink-d);
+  box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.progress-bar {
+  font-family: var(--font-body);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border-radius: 50px;
+  background-size: 30px 30px;
+  background-image: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.25) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0.25) 75%,
+    transparent 75%,
+    transparent
+  );
+  animation: stripeScroll 0.6s linear infinite;
+}
+
+/* UTILITY OVERRIDES */
+.bg-light {
+  background-color: var(--surface-light) !important;
+}
+
+.bg-primary {
+  background-color: var(--banner-lime) !important;
+}
+
+.text-muted {
+  color: var(--text-muted) !important;
+}
+
+.text-danger {
+  color: var(--magenta) !important;
+}
+
+.text-success {
+  color: var(--neon-green) !important;
+}
+
+.text-white {
+  color: var(--text-primary) !important;
+}
+
+.lead {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+}
+
+.border {
+  border-color: var(--bubble-pink-d) !important;
+}
+
+.rounded {
+  border-radius: 16px !important;
+}
+
+.fw-bold {
+  font-family: var(--font-body);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+/* CONTAINER SPACING */
+.container {
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+/* HEADINGS */
+h1 {
+  font-size: 2.8rem;
+  color: var(--lime);
+  border-bottom: 4px solid var(--lime);
+  display: inline-block;
+  padding-bottom: 6px;
+  margin-bottom: 20px;
+}
+
+h3 {
+  color: var(--lime);
+}
+
+/* GAME INSTRUCTIONS TITLE */
+.game-instructions-title {
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: 2rem;
+  color: #fde962;
+  letter-spacing: 0.02em;
+  margin-bottom: 16px;
+  text-shadow: 
+    -1px -1px 0 #000,  
+     1px -1px 0 #000,
+    -1px  1px 0 #000,
+     1px  1px 0 #000;
+}
+
+/* FOOTER */
+footer,
+.footer-text {
+  font-family: var(--font-body);
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+footer strong,
+.footer-text strong,
+footer em,
+.footer-text em {
+  color: var(--lime);
+  font-weight: 700;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 768px) {
+  h1 { font-size: 2.2rem; }
+  h2 { font-size: 1.6rem; }
+
+  .banner {
+    width: 96%;
+    border-radius: 0 0 40px 40px;
+    padding: 14px 12px 20px;
+  }
+  .banner-train { height: 60px; }
+  .banner-logo { height: 80px; }
+  .banner-login-btn img { height: 60px; }
+
+  .game-instructions-title {
+    font-size: 1.4rem;
+  }
+
+  .btn-lg { font-size: 1.1rem; padding: 12px 28px; }
+}
+
+/* instructions.png */
+
+.title-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.title-logo {
+  height: 2.5rem;
+  width: auto;
+  /* Removed drop-shadow for a clean, flat look */
+  filter: none; 
 }
