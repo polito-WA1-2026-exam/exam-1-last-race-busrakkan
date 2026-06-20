@@ -5,7 +5,9 @@ import cors from "cors";
 import passport from 'passport';
 import LocalStrategy from 'passport-local';
 import session from 'express-session';
-import { initDb, getUser, getNetwork, getSegmentsOnly, getAllStations, getAllSegments, addGame } from "./dao.js";
+import { initDb, getUser, getNetwork, getSegmentsOnly, getAllStations, getAllSegments, addGame,
+  getGame, startPlanning
+ } from "./dao.js";
 
 const app = express();
 const port = 3001;
@@ -175,6 +177,21 @@ app.post("/api/games", isLoggedIn, async (req, res) => {
     res.status(500).end();
   }
 });
+
+
+// POST /api/games/:id/start (begin planning)
+app.post("/api/games/:id/start", isLoggedIn, async (req, res) => {
+  try {
+    const game = await getGame(req.params.id);
+    if (!game) return res.status(404).json({ error: "Game not found" });
+    if (game.user_id !== req.user.id) return res.status(403).json({ error: "Forbidden" });
+    await startPlanning(req.params.id);
+    res.status(200).json({ success: true });
+  } catch {
+    res.status(500).end();
+  }
+});
+
 
 initDb().then(() => {
   app.listen(port, () => { console.log(`API server started at http://localhost:${port}`) });
