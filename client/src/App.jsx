@@ -13,6 +13,7 @@ import LoginPage from './ui/Login.jsx';
 import InstructionsPage from './ui/Instructions.jsx';
 import Header from './ui/Header.jsx';
 import Footer from './ui/Footer.jsx';
+import GamePage from './ui/Game.jsx';
 
 function App() {
   const navigate = useNavigate()
@@ -46,6 +47,7 @@ function App() {
             <Route index element={<HomeView />} />
             <Route path='login' element={<LoginView doLogin={handleLogin} />} />
             <Route path='instructions' element={<InstructionsPage />} />
+            <Route path='play' element={<PlayView />} />
           </Route>
         </Routes>
       </Container>
@@ -80,5 +82,19 @@ function LoginView(props) {
 
   return <LoginPage doLogin={props.doLogin} />
 }
+
+function InstructionsView() {
+  return <InstructionsPage />
+}
+
+function PlayView() {
+  const user = useContext(AuthContext)
+
+  if (!user.id)
+    return <Navigate to='/instructions' />
+
+  return <GamePage />
+}
+
 
 export default App;
