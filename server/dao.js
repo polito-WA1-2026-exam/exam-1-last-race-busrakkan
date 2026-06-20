@@ -132,3 +132,113 @@ export function startPlanning(gameId) {
     });
   });
 }
+
+export function getLineStationsForStation(stationId) {
+  return new Promise((resolve, reject) => {
+    db.all("SELECT * FROM line_stations WHERE station_id = ?", [stationId], (err, rows) => {
+      if (err) return reject(err);
+      resolve(rows);
+    });
+  });
+}
+
+export function submitRoute(gameId, segmentIds, lineIds) {
+  return new Promise((resolve, reject) => {
+    const gameSql = "UPDATE games SET submitted_at = datetime('now') WHERE id = ?";
+    db.run(gameSql, [gameId], function (err) {
+      if (err) return reject(err);
+
+      const stmt = db.prepare("INSERT INTO game_route_segments (game_id, segment_id, line_id, position) VALUES (?, ?, ?, ?)");
+      for (let i = 0; i < segmentIds.length; i++) {
+        stmt.run([gameId, segmentIds[i], lineIds[i], i]);
+      }
+      stmt.finalize((err) => {
+        if (err) return reject(err);
+
+        db.all("SELECT * FROM events", [], (err, events) => {
+          if (err) return reject(err);
+
+          let coins = 20;
+          const steps = [];
+          const stepStmt = db.prepare("INSERT INTO game_step_events (game_id, segment_position, event_id, coins_before, coins_after) VALUES (?, ?, ?, ?, ?)");
+
+          for (let i = 0; i < segmentIds.length; i++) {
+            const ev = events[Math.floor(Math.random() * events.length)];
+            const before = coins;
+            coins = coins + ev.effect;   // no flooring here. intermediate values can be negative
+            steps.push({ coinsBefore: before, coinsAfter: coins, event: ev });
+            stepStmt.run([gameId, i, ev.id, before, coins]);
+          }
+
+          stepStmt.finalize((err) => {
+            if (err) return reject(err);
+
+            const score = Math.max(0, coins);   // floor only the final score
+            db.run(
+              "UPDATE games SET status = 'completed', score = ?, completed_at = datetime('now') WHERE id = ?",
+              [score, gameId],
+              (err) => {
+                if (err) return reject(err);
+                resolve({ valid: true, score, steps });
+              }
+            );
+          });
+        });
+      });
+    });
+  });
+}
+
+export function completeGameInvalid(gameId) {
+  return new Promise((resolve, reject) => {
+    db.run(
+      "UPDATE games SET status = 'completed', score = 0, completed_at = datetime('now') WHERE id = ?",
+      [gameId],
+      (err) => {
+        if (err) return reject(err);
+        resolve();
+      }
+    );
+  });
+}
+
+export function getGame(gameId) {
+  return new Promise((resolve, reject) => {
+    const sql = "SELECT * FROM games WHERE id = ?";
+    db.get(sql, [gameId], (err, row) => {
+      if (err) return reject(err);
+      if (!row) return resolve(null);
+
+      db.all(
+        "SELECT s1.name AS from_station, s2.name AS to_station, l.name AS line, se.station1_id, se.station2_id, grs.position FROM game_route_segments grs JOIN segments se ON grs.segment_id = se.id JOIN stations s1 ON se.station1_id = s1.id JOIN stations s2 ON se.station2_id = s2.id JOIN lines l ON grs.line_id = l.id WHERE grs.game_id = ? ORDER BY grs.position",
+        [gameId],
+        (err, routeSegs) => {
+          if (err) return reject(err);
+
+          db.all(
+            "SELECT gse.*, e.description, e.effect FROM game_step_events gse JOIN events e ON gse.event_id = e.id WHERE gse.game_id = ? ORDER BY gse.segment_position",
+            [gameId],
+            (err, steps) => {
+              if (err) return reject(err);
+              resolve({
+                id: row.id,
+                user_id: row.user_id,
+                status: row.status,
+                startingStation: row.starting_station_id,
+                destinationStation: row.destination_station_id,
+                coins: row.coins,
+                score: row.score,
+                route: routeSegs,
+                steps: steps.map(s => ({
+                  coinsBefore: s.coins_before,
+                  coinsAfter: s.coins_after,
+                  event: { description: s.description, effect: s.effect },
+                })),
+              });
+            }
+          );
+        }
+      );
+    });
+  });
+}
