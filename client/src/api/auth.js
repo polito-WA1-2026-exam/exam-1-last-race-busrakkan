@@ -1,5 +1,7 @@
+import { BASE_URL } from './config.js'
+
 export async function doLogin(username, password) {
-    const response = await fetch('http://localhost:3001/api/sessions', {
+    const response = await fetch(`${BASE_URL}/sessions`, {
         method: 'POST',
         body: JSON.stringify({ username, password }),
         headers: { 'Content-Type': 'application/json' },
@@ -15,7 +17,7 @@ export async function doLogin(username, password) {
 }
 
 export async function doLogout() {
-    const response = await fetch('http://localhost:3001/api/sessions/current', {
+    const response = await fetch(`${BASE_URL}/sessions/current`, {
         method: 'DELETE',
         credentials: 'include'
     })
@@ -25,7 +27,7 @@ export async function doLogout() {
 }
 
 export async function checkSession() {
-    const response = await fetch('http://localhost:3001/api/sessions/current', {
+    const response = await fetch(`${BASE_URL}/sessions/current`, {
         credentials: "include"
     })
     if (response.ok) return await response.json()

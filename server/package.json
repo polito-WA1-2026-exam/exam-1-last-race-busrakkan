@@ -1,7 +1,7 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "description": "",
+  "description": "Server-side for the Last Race game exam project",
   "license": "ISC",
   "author": "",
   "type": "module",
@@ -11,8 +11,10 @@
   },
   "dependencies": {
     "cors": "^2.8.6",
+    "dayjs": "^1.11.20",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
+    "express-validator": "^7.3.1",
     "morgan": "^1.10.1",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
