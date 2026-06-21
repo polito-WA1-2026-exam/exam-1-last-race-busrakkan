@@ -5,6 +5,8 @@ import StationsOnlyMap from "./StationsOnlyMap.jsx";
 import Timer from "./Timer.jsx";
 import SegmentPicker from "./SegmentPicker.jsx";
 import RouteBuilder from "./RouteBuilder.jsx";
+import StepDisplay from "./StepDisplay.jsx";
+import CoinCounter from "./CoinCounter.jsx";
 
 function Game() {
   const {
@@ -74,13 +76,21 @@ function Game() {
     return (
       <Container className="mt-3 text-center">
         <h3>Execution</h3>
-        <p>Coins: {displayedCoins}</p>
-        <p className="text-muted">Step display coming soon.</p>
+        <CoinCounter coins={displayedCoins} />
+
+        {currentStep < steps.length && (
+          <StepDisplay
+            step={steps[currentStep]}
+            stepNumber={currentStep + 1}
+            totalSteps={steps.length}
+          />
+        )}
+
         {currentStep < steps.length - 1 && (
-          <Button variant="primary" onClick={advanceStep}>Next</Button>
+          <Button variant="primary" className="mt-3" onClick={advanceStep}>Next</Button>
         )}
         {currentStep === steps.length - 1 && steps.length > 0 && (
-          <Button variant="success" onClick={advanceStep}>See Result</Button>
+          <Button variant="success" className="mt-3" onClick={advanceStep}>See Result</Button>
         )}
       </Container>
     );

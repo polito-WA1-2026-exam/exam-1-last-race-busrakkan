@@ -247,6 +247,41 @@
   margin-bottom: 6px;
 }
 
+/* CARDS — Sticker Panel */
+.card {
+  border: 2px solid var(--bubble-pink-d);
+  border-radius: 20px !important;
+  background: var(--surface-white);
+  box-shadow: var(--shadow-sticker-lg);
+}
+
+.card-body {
+  padding: 24px 28px;
+}
+
+.card-title {
+  font-family: var(--font-body);
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  font-size: 1.8rem;
+  color: var(--lime);
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.1);
+}
+
+.card-subtitle {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+.card-text {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--text-primary);
+}
+
 /* PROGRESS BARS — Neon Pill */
 .progress {
   background: var(--bg-pink-light);
