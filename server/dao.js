@@ -262,9 +262,28 @@ export function getRanking() {
   return new Promise((resolve, reject) => {
     const sql = "SELECT u.username, MAX(g.score) AS bestScore, COUNT(g.id) AS gamesPlayed FROM users u JOIN games g ON g.user_id = u.id WHERE g.status = 'completed' GROUP BY u.id ORDER BY bestScore DESC";
     db.all(sql, [], (err, rows) => {
-      if (err) reject(err);
+      if (err) return reject(err);
       const ranking = rows.map((r, idx) => ({ rank: idx + 1, username: r.username, bestScore: r.bestScore, gamesPlayed: r.gamesPlayed }));
       resolve(ranking);
     });
   });
 }
+
+
+
+// startingStation/destinationStation are raw station IDs here, unlike POST /api/games which returns {id, name}
+// GET /api/games/:id
+app.get("/api/games/:id", isLoggedIn, async (req, res) => {
+  try {
+    const game = await getGame(req.params.id);
+    if (!game) {
+      return res.status(404).json({ error: "Game not found" });
+    }
+    if (game.user_id !== req.user.id) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+    res.json(game);
+  } catch {
+    res.status(500).end();
+  }
+});

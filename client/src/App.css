@@ -1,4 +1,4 @@
-/*BANNER HEADER — Flat lime green banner, no shadows */
+/* BANNER HEADER — Flat lime green banner, no shadows */
 .banner-wrapper {
   width: 100%;
   background: var(--bg-pink);
@@ -67,7 +67,7 @@
   color: var(--text-primary);
 }
 
-/* BUTTONS — Pill-Shaped Sticker Style */
+/*  BUTTONS — Pill-Shaped Sticker Style */
 .btn {
   font-family: var(--font-body);
   font-weight: 700;
@@ -275,6 +275,44 @@
   animation: stripeScroll 0.6s linear infinite;
 }
 
+/*  LIST GROUPS — Rounded Route List */
+.list-group {
+  border: 2px solid var(--bubble-pink-d);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sticker-sm);
+}
+
+.list-group-item {
+  font-family: var(--font-body);
+  font-weight: 600;
+  border-bottom: 1px solid var(--bg-pink-light);
+  padding: 11px 16px;
+  background: var(--surface-white);
+  color: var(--text-primary);
+}
+
+.list-group-numbered > .list-group-item::before {
+  font-family: var(--font-body);
+  font-weight: 700;
+  color: var(--magenta);
+}
+
+/* SEGMENT LIST ITEMS (Planning Phase) */
+.bg-primary.text-white {
+  background-color: var(--banner-lime) !important;
+  color: var(--text-primary) !important;
+  font-weight: 700;
+}
+
+.p-1.mb-1.rounded {
+  border-radius: 12px !important;
+  transition: all 0.15s ease;
+}
+.p-1.mb-1.rounded:hover {
+  transform: translateX(4px);
+}
+
 /* UTILITY OVERRIDES */
 .bg-light {
   background-color: var(--surface-light) !important;
@@ -373,7 +411,6 @@ footer em,
 }
 
 /* RESPONSIVE */
-
 @media (max-width: 768px) {
   h1 { font-size: 2.2rem; }
   h2 { font-size: 1.6rem; }

@@ -1,6 +1,10 @@
 import { Container, Button } from "react-bootstrap";
 import useGame from "../hooks/useGame";
 import NetworkMap from "./Map.jsx";
+import StationsOnlyMap from "./StationsOnlyMap.jsx";
+import Timer from "./Timer.jsx";
+import SegmentPicker from "./SegmentPicker.jsx";
+import RouteBuilder from "./RouteBuilder.jsx";
 
 function Game() {
   const {
@@ -39,14 +43,29 @@ function Game() {
 
   if (phase === 'planning') {
     return (
-      <Container className="mt-3 text-center">
-        <h3>Planning</h3>
-        <p><strong>From:</strong> {game.startingStation.name} &rarr; <strong>To:</strong> {game.destinationStation.name}</p>
-        <p className="text-muted">Segment list and timer coming soon.</p>
-        <p>{selectedSegments.length} segment(s) selected</p>
-        <Button variant="primary" size="lg" onClick={submitMyRoute} disabled={selectedSegments.length === 0}>
-          Submit Route
-        </Button>
+      <Container className="mt-3 d-flex flex-column" style={{ flex: 1, minHeight: 0 }}>
+        <Timer onTimeout={submitMyRoute} />
+
+        <div className="row mt-2" style={{ flex: 1, minHeight: 0 }}>
+          <div className="col-md-8 d-flex flex-column" style={{ minHeight: 0 }}>
+            <h3>Planning</h3>
+            <p><strong>From:</strong> {game.startingStation.name} &rarr; <strong>To:</strong> {game.destinationStation.name}</p>
+            <div style={{ flexGrow: 1, minHeight: 0 }}>
+              <StationsOnlyMap stations={network.stations} />
+            </div>
+          </div>
+          <div className="col-md-4">
+            <SegmentPicker segments={segments} selectedSegments={selectedSegments} onAdd={addSegment} />
+          </div>
+        </div>
+
+        <RouteBuilder segments={selectedSegments} onRemove={removeSegment} />
+
+        <div className="text-center mt-3 mb-4">
+          <Button variant="primary" size="lg" onClick={submitMyRoute} disabled={selectedSegments.length === 0}>
+            Submit Route
+          </Button>
+        </div>
       </Container>
     );
   }

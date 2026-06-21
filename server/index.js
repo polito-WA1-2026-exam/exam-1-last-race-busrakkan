@@ -10,7 +10,7 @@ import { check, validationResult } from "express-validator";
 import {
   initDb, getUser, getNetwork, getSegmentsOnly, getAllStations, getAllSegments, addGame,
   getGame, startPlanning, getLineStationsForStation, submitRoute, completeGameInvalid,
-  getInterchangeStationIds
+  getInterchangeStationIds, getRanking
 } from "./dao.js";
 
 import {
