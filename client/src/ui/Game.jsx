@@ -7,6 +7,7 @@ import SegmentPicker from "./SegmentPicker.jsx";
 import RouteBuilder from "./RouteBuilder.jsx";
 import StepDisplay from "./StepDisplay.jsx";
 import CoinCounter from "./CoinCounter.jsx";
+import ScoreDisplay from "./ScoreDisplay.jsx";
 
 function Game() {
   const {
@@ -100,10 +101,12 @@ function Game() {
     return (
       <Container className="mt-3 text-center">
         <h3>Result</h3>
-        <p>Final score: {score}</p>
-        <Button variant="primary" size="lg" onClick={() => startNewGame()}>
-          New Game
-        </Button>
+        <ScoreDisplay score={score} />
+        <div className="mt-3">
+          <Button variant="primary" size="lg" onClick={() => startNewGame()}>
+            New Game
+          </Button>
+        </div>
       </Container>
     );
   }
