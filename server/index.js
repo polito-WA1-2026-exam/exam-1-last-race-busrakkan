@@ -247,6 +247,8 @@ app.get("/api/ranking", isLoggedIn, async (req, res) => {
   }
 });
 
+
+
 initDb().then(() => {
   app.listen(port, () => { console.log(`API server started at http://localhost:${port}`) });
 });

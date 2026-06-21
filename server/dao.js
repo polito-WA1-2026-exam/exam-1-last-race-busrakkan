@@ -271,19 +271,3 @@ export function getRanking() {
 
 
 
-// startingStation/destinationStation are raw station IDs here, unlike POST /api/games which returns {id, name}
-// GET /api/games/:id
-app.get("/api/games/:id", isLoggedIn, async (req, res) => {
-  try {
-    const game = await getGame(req.params.id);
-    if (!game) {
-      return res.status(404).json({ error: "Game not found" });
-    }
-    if (game.user_id !== req.user.id) {
-      return res.status(403).json({ error: "Forbidden" });
-    }
-    res.json(game);
-  } catch {
-    res.status(500).end();
-  }
-});
