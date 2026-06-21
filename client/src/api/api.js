@@ -61,4 +61,14 @@ async function submitRoute(gameId, segmentIds) {
     }
 }
 
-export { getNetwork, getSegments, createGame, startPlanning, submitRoute }
+async function getRanking() {
+    try {
+        const response = await fetch(`${BASE_URL}/ranking`, { credentials: 'include' })
+        if (response.ok) return await response.json()
+        throw new Error('HTTP error in getRanking, code=' + response.status)
+    } catch (ex) {
+        throw new Error("Network error", { cause: ex })
+    }
+}
+
+export { getNetwork, getSegments, createGame, startPlanning, submitRoute, getRanking }

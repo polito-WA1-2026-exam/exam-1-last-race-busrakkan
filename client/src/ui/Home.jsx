@@ -9,6 +9,9 @@ function HomePage() {
       <h1>Last Race</h1>
       <p className="lead">Navigate the underground network and reach your destination!</p>
       <Button variant="primary" size="lg" onClick={() => navigate('/play')}>Play</Button>
+      <div className="mt-3">
+        <Button variant="outline-secondary" onClick={() => navigate('/ranking')}>Ranking</Button>
+      </div>
     </Container>
   )
 }

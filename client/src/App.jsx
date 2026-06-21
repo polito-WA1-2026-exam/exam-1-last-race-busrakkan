@@ -14,6 +14,7 @@ import InstructionsPage from './ui/Instructions.jsx';
 import Header from './ui/Header.jsx';
 import Footer from './ui/Footer.jsx';
 import GamePage from './ui/Game.jsx';
+import RankingPage from './ui/Ranking.jsx';
 
 function App() {
   const navigate = useNavigate()
@@ -48,6 +49,7 @@ function App() {
             <Route path='login' element={<LoginView doLogin={handleLogin} />} />
             <Route path='instructions' element={<InstructionsPage />} />
             <Route path='play' element={<PlayView />} />
+            <Route path='ranking' element={<RankingView />} />
           </Route>
         </Routes>
       </Container>
@@ -96,5 +98,13 @@ function PlayView() {
   return <GamePage />
 }
 
+function RankingView() {
+  const user = useContext(AuthContext)
+
+  if (!user.id)
+    return <Navigate to='/instructions' />
+
+  return <RankingPage />
+}
 
 export default App;
