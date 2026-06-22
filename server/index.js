@@ -85,14 +85,6 @@ app.delete("/api/sessions/current", (req, res) => {
   });
 });
 
-// GET /api/instructions (public, no auth)
-app.get("/api/instructions", (req, res) => {
-  res.json({
-    title: "Game Instructions",
-    content: "Last Race begins.. You get to plan your route based on the metro network map, the goal is to reach your destination before time runs out. Some events happen randomly, you lose or win points based on your luck!"
-  });
-});
-
 
 // GET /api/network (auth required)
 app.get("/api/network", isLoggedIn, async (req, res) => {
@@ -149,7 +141,7 @@ app.post("/api/games", isLoggedIn, async (req, res) => {
 });
 
 
-// POST /api/games/:id/start (begin planning)
+// POST /api/games/:id/start (start planning)
 app.post("/api/games/:id/start", isLoggedIn, async (req, res) => {
   try {
     const game = await getGame(req.params.id);
