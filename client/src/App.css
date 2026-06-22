@@ -251,8 +251,16 @@
 .card {
   border: 2px solid var(--bubble-pink-d);
   border-radius: 20px !important;
-  background: var(--surface-white);
+  background-color: var(--surface-white); 
   box-shadow: var(--shadow-sticker-lg);
+}
+
+/* fix the Bootstrap elements inside */
+.accordion-item,
+.accordion-button,
+.accordion-body {
+  background-color: #ffc6f7 !important;
+  color: black !important;
 }
 
 .card-body {

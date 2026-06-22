@@ -85,9 +85,6 @@ function LoginView(props) {
   return <LoginPage doLogin={props.doLogin} />
 }
 
-function InstructionsView() {
-  return <InstructionsPage />
-}
 
 function PlayView() {
   const user = useContext(AuthContext)

@@ -11,7 +11,7 @@ const positions = {
   "Racconigi": [280, 140],
   "Bernini": [340, 140],
   "Principi d'Acaja": [160, 200],
-  "XVIII Dicembre": [240, 200],
+  "XVIII Dicembre": [100, 200],
   "Vinzaglio": [220, 200],
   "Re Umberto": [280, 200],
   "Porta Susa": [340, 200],
@@ -34,7 +34,7 @@ const labelOffsets = {
   "Porta Susa": { dx: 8, dy: 5 },
 };
 
-function StationNamesMap({ stations }) {
+function StationsOnlyMap({ stations }) {
   return (
     <div className="p-2" style={{ backgroundColor: '#000', border: '1px solid #333', borderRadius: '8px', height: '100%' }}>
       <svg viewBox="20 65 360 160" preserveAspectRatio="xMidYMid meet"
@@ -69,4 +69,4 @@ function StationNamesMap({ stations }) {
   );
 }
 
-export default StationNamesMap;
+export default StationsOnlyMap;

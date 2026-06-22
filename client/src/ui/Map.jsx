@@ -11,7 +11,7 @@ const positions = {
   "Racconigi": [280, 140],
   "Bernini": [340, 140],
   "Principi d'Acaja": [160, 200],
-  "XVIII Dicembre": [240, 200],
+  "XVIII Dicembre": [100, 200],
   "Vinzaglio": [220, 200],
   "Re Umberto": [280, 200],
   "Porta Susa": [340, 200],
